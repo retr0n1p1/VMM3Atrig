@@ -36,6 +36,8 @@ extern TIM_HandleTypeDef htim1;
 
 extern TIM_HandleTypeDef htim2;
 
+extern TIM_HandleTypeDef htim3;
+
 extern TIM_HandleTypeDef htim5;
 
 extern TIM_HandleTypeDef htim20;
@@ -46,10 +48,16 @@ extern TIM_HandleTypeDef htim20;
 
 void MX_TIM1_Init(void);
 void MX_TIM2_Init(void);
+void MX_TIM3_Init(void);
 void MX_TIM5_Init(void);
 void MX_TIM20_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
+uint8_t is_trigger_detected(void);
+void clear_trigger_flag(void);
+uint32_t get_last_trigger_time(void);
+uint32_t get_trigger_count(void);
 
 /* USER CODE END Prototypes */
 

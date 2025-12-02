@@ -15,7 +15,13 @@
 
 #define VMM3A_H
 
-#define BOARD_ID 112
+//Settings
+
+#define BOARD_ID 135 
+#define sizeeFIFO 5 //!Длина статического массива для спилов
+#define window 4000 //!Окно для поиска события для отправки
+#define trigDelay 1000 //!Примерная реальная задержка тригера, по ней будем отбирать ближайшее
+
 
 #define VMM3A_START  GPIOB->BSRR = GPIO_BSRR_BR0 | GPIO_BSRR_BS9  //GPIOB->ODR |=  GPIO_ODR_ODR_9
 
@@ -37,8 +43,21 @@ typedef struct
 	uint16_t REGISTERS[10];
 	uint16_t spillCount;
 	uint16_t hitCount;
+	uint32_t bcidd;
+	_Bool term;
 	hit_t 	 hits[64];
 } spill_t;
+
+extern const uint8_t sizeFIFO; //!Делаем глобальные переменные для FIFO буффера
+extern uint8_t posFIFO;
+
+typedef struct //!Просто массив из спилов
+{
+        spill_t  spills[sizeeFIFO];
+} FIFO_t;
+
+extern FIFO_t FIFO;
+
 
 /*
 REGISTERS[ 0] = UID
@@ -64,11 +83,12 @@ void monitoringADC(uint8_t state);
 void testPulser(uint8_t state);
 void dataTaking(uint8_t state);
 
+void initGlobals();
 void VMM3A_start(void);
 void VMM3A_pulse(void);
 void VMM3A_stop(void);
 void VMM3A_reset(void);
- int VMM3A_readout(void);
+int VMM3A_readout(void); //!Тут раньше было int, но не использовалось
 void VMM3A_init(uint8_t * config);
 
 #endif // VMM3A_H

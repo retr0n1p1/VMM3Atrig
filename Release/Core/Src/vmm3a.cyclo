@@ -1,5 +1,0 @@
-../Core/Src/vmm3a.c:13:6:VMM3A_init	2
-../Core/Src/vmm3a.c:26:6:VMM3A_start	1
-../Core/Src/vmm3a.c:32:6:VMM3A_stop	1
-../Core/Src/vmm3a.c:101:6:Dummy_Receive	1
-../Core/Src/vmm3a.c:107:6:VMM3A_readout	5

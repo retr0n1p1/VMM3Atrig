@@ -41,7 +41,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,7 +68,6 @@ uint8_t VMM3A_HG_config[216] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 uint8_t VMM3A_TP_config[216] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x10, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x00, 0x04, 0x00, 0x5F, 0xEE, 0x00, 0x00, 0x00, 0x21, 0xCD, 0x24, 0x1F, 0x2E, 0xB8};
 
 
-spill_t Spill = {0};
 uint8_t   calibRunState = 0;
 uint8_t stressTestState = 0;
 uint8_t adcMonitorState = 0;
@@ -109,6 +107,7 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
+  initGlobals(); //!Инициализируем буфер, попутно на все спилы в нем вешаем term=1, чтобы при обработке игнорировались, пока пусты
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   MX_ADC1_Init();
@@ -120,6 +119,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM5_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();//!Понятно
   MX_TIM20_Init();
   /* USER CODE BEGIN 2 */
   hspi1.Instance->CR1 |= SPI_CR1_SPE;
@@ -179,18 +179,26 @@ int main(void)
   HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_9);
 
 
+inline uint32_t bc(uint32_t* ti1, uint32_t* ti2){ //!Для рассчета расстояний во времени (с учетом переполнения), не до конца уверен что uint адекватно справляется с разницей, отрицательных событий точно не возникает, но все же
+	if(*ti2<*ti1){
+		return 4294967295 - *ti1 + 1 + *ti2;
+	} 
+	else{
+		return *ti2-*ti1;
+	}
+}
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
 //	  HAL_IWDG_Refresh(&hiwdg);
-
 	  if(stressTestState) {
 		  getRandomSpill(0);
-	  	  DAQ_transmit(&Spill, Spill.hitCount);
+	  	  DAQ_transmit(&testSpill);
 	  }
 
 	  if(adcMonitorState) {
@@ -201,78 +209,62 @@ int main(void)
 	  	  ADC_transmit(voltage);
 	  }
 
-	  if(calibRunState) {
-		  GPIOB->BSRR = GPIO_BSRR_BS8;
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-		  __NOP();
-
-		  VMM3A_STOP;
-		  VMM3A_readout();
-		  GPIOB->BSRR = GPIO_BSRR_BR8;
-		  Spill.hitCount = 64;
-		  DAQ_transmit(&Spill, Spill.hitCount);
-		  VMM3A_START;
-	  }
-
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
-	  }
-  /* USER CODE END 3 */
+       //!Фильтрация по времени
+   if (is_trigger_detected()) { //!Отлавливаем флаг тригера
+    FIFO_t tempFIFO; 
+    __disable_irq(); 
+    tempFIFO = FIFO; //!Компируем данные во временный буфер, выключив прерывания дабы не повредить
+    __enable_irq(); //!Возможно нужно весь расчет обернуть в это, не уверен что будет если в процессе сработает прерывание
+    spill_t tempo;
+    uint32_t delta_min = window + 10;
+    uint8_t min = 0;
+    uint32_t moment = get_last_trigger_time(); //!Берем время срабатывания тригера по второму таймеру
+    for(int i = 0; i<sizeeFIFO; i++){
+	if(tempFIFO.spills[i].term == 0){
+		uint32_t deltaa = bc(&tempFIFO.spills[i].bcidd, &moment); 
+		if(deltaa < window){ //!Посчитали разницу, если больше окна игнорируем
+			if(deltaa<trigDelay){ //!Далее сравниваем с предполагаемой задержкой и выбираем что поближе
+				if(trigDelay - deltaa < delta_min){
+					delta_min = trigDelay - deltaa;
+					min = i;		
+				}
+			}
+			else{
+				if(deltaa - trigDelay < delta_min){
+					delta_min = deltaa - trigDelay;
+					min = i;
+				}
+			}
+		}
+	}
+    }
+    if(delta_min != window + 10){ //!Если что-то нашли
+	tempo = tempFIFO.spills[min];
+	tempFIFO.spills[min].term = 1; //!Поднимаем флаг на игнор этого спила
+    	tempo.spillCount = get_trigger_count(); //!Указываем счетчик спилов по тригеру
+        for(int i = 0; i<tempo.hitCount; i++){
+		tempo.hits[i].event = get_trigger_count(); //!Прописываем его же в каждый хит
+    	}
+	DAQ_transmit(&tempo);
+    }
+    clear_trigger_flag(); 
+  }
+	  /* //!Без фильтрации по времени, чисто отправка последнего из буффера (для тестов)
+    if (is_trigger_detected()) {
+    __disable_irq();
+    spill_t tempo;
+    tempo = FIFO.spills[posFIFO];
+    tempo.spillCount = get_trigger_count();
+    for(int i = 0; i<tempo.hitCount; i++){
+    	tempo.hits[i].event = get_trigger_count();
+    }
+    __enable_irq();
+    DAQ_transmit(&tempo);
+    // Сбросить флаг триггера
+    clear_trigger_flag();
+    }
+    */
+  }
 }
 
 /**

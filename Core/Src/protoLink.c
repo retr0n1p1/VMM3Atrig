@@ -5,13 +5,11 @@
 
 extern UART_HandleTypeDef huart1;
 extern TIM_HandleTypeDef  htim5;
-extern spill_t 			  Spill;
 extern uint8_t  stressTestState;
 extern uint8_t    calibRunState;
 extern uint8_t  adcMonitorState;
 extern uint8_t  dataTakingState;
 
-const spill_t EmptySpill = {0};
 
 uint8_t buff[256] = {0};
 uint8_t linkState = 0;
@@ -130,22 +128,10 @@ void ADC_transmit(int16_t value) {
 
 }
 
-__IO void DAQ_transmit(spill_t * spill, uint8_t len) {
+__IO void DAQ_transmit(spill_t * spill) {//!Убрал также передачу количества хитов, берем из переданного спила
 
-	HAL_UART_Transmit(&huart1, (uint8_t *)&spill->hits, Spill.hitCount * 16, 1000); //Function to send text on UART
+	HAL_UART_Transmit(&huart1, (uint8_t *)&spill->hits, spill->hitCount * 16, 1000); //Function to send text on UART
 
 //	HAL_IWDG_Refresh(&hiwdg);
-//	Spill = EmptySpill;
 }
-
-void DAQ_dummy_transmit(spill_t * spill, uint8_t len) {
-	for(int i = 0; i < len; i++) {
-		//board:spill:channel:charge:time
-		char buffer[34];
-
-		sprintf(buffer, "%03d, %05d, %03d, %05d, %05d\r\n", 35, spill->spillCount, spill->hits[i].channel,
-												spill->hits[i].charge, spill->hits[i].time);
-		HAL_UART_Transmit(&huart1, (uint8_t *)&buffer, 31, 100); //Function to send text on UART
-	}
-//	HAL_Delay(1);
-}
+//!Убрал DAQ_dummy_Transmit за ненадобностью

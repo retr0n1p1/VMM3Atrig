@@ -4,7 +4,7 @@
 #include "protoLink.h"
 #include "vmm3a.h"
 
-extern spill_t 			 Spill;
+spill_t testSpill = {0};
 
 hit_t getRandomHit(uint8_t size, uint16_t event, uint32_t bcid) {
 	hit_t hit = {0};
@@ -25,8 +25,8 @@ void getRandomSpill(uint8_t size) {
 
 
 	for(int i = 0; i < 64; i++)
-			Spill.hits[i] = getRandomHit(size, Spill.spillCount, TIM2->CNT);
+			testSpill.hits[i] = getRandomHit(size, testSpill.spillCount, TIM2->CNT);
 
-	Spill.hitCount = size;
-	Spill.spillCount += 1;
+	testSpill.hitCount = size;
+	testSpill.spillCount += 1;
 }

@@ -24,8 +24,13 @@
 
 /* USER CODE END 0 */
 
+volatile uint32_t trigger_timestamp = 0;
+volatile uint8_t trigger_detected = 0;
+volatile uint32_t trigger_counter = 0;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim3; //! понятно
 TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim20;
 
@@ -111,6 +116,91 @@ void MX_TIM2_Init(void)
   /* USER CODE END TIM2_Init 2 */
 
 }
+
+void MX_TIM3_Init(void) //!Тут вся функция голимый вайбкод, прерывание создается тут же, функция обработки в самом низу
+{
+  /* USER CODE BEGIN TIM3_Init 0 */
+  // Инициализация пина PB0 как TIM3_CH3
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;  // PB0 как TIM3_CH3
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_IC_InitTypeDef sConfigIC = {0};  // Добавить для Input Capture
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+  /* USER CODE END TIM3_Init 1 */
+
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 0;                    // Без предделителя
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 0xFFFFFFFF;              // Максимальный период
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  // Инициализация Input Capture
+  if (HAL_TIM_IC_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  // Настройка Input Capture для канала 3
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;  // Передний фронт
+  sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;        // Прямое подключение
+  sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;                  // Каждый фронт
+  sConfigIC.ICFilter = 1;  // Минимальный фильтр для 100 нс
+
+  if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* USER CODE BEGIN TIM3_Init 2 */
+  // Дополнительная настройка фильтра для 100 нс сигнала
+  TIM3->CCMR2 &= ~TIM_CCMR2_IC3F;       // Сброс фильтра
+  TIM3->CCMR2 |= (1 << 12);             // fDTS/2, N=2 (минимальный фильтр)
+
+  // Включаем прерывание по захвату
+  __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_CC3);
+
+  // Настройка приоритета прерывания (НИЗКИЙ - 6, ниже чем EXTI9_5)
+  HAL_NVIC_SetPriority(TIM3_IRQn, 6, 0);
+  HAL_NVIC_EnableIRQ(TIM3_IRQn);
+
+  // Запускаем таймер
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_IC_Start(&htim3, TIM_CHANNEL_3);
+
+  /* USER CODE END TIM3_Init 2 */
+}
+
 /* TIM5 init function */
 void MX_TIM5_Init(void)
 {
@@ -223,6 +313,24 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
 
   /* USER CODE END TIM2_MspInit 1 */
   }
+
+  else if(tim_baseHandle->Instance==TIM3) //! Понятно
+  {
+  /* USER CODE BEGIN TIM3_MspInit 0 */
+
+  /* USER CODE END TIM3_MspInit 0 */
+    /* TIM3 clock enable */
+    __HAL_RCC_TIM3_CLK_ENABLE();
+
+    /* TIM3 interrupt Init */
+    // Примечание: прерывание уже настроено в MX_TIM3_Init
+    // Здесь только если нужны дополнительные настройки
+
+  /* USER CODE BEGIN TIM3_MspInit 1 */
+
+  /* USER CODE END TIM3_MspInit 1 */
+  }
+
   else if(tim_baseHandle->Instance==TIM5)
   {
   /* USER CODE BEGIN TIM5_MspInit 0 */
@@ -283,6 +391,26 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 
   /* USER CODE END TIM2_MspDeInit 1 */
   }
+  
+  else if(tim_baseHandle->Instance==TIM3) //! Понятно
+  {
+  /* USER CODE BEGIN TIM3_MspDeInit 0 */
+
+  /* USER CODE END TIM3_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM3_CLK_DISABLE();
+
+    /* TIM3 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(TIM3_IRQn);
+
+    /* GPIO PB0 deinit */
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
+
+  /* USER CODE BEGIN TIM3_MspDeInit 1 */
+
+  /* USER CODE END TIM3_MspDeInit 1 */
+  }
+  
   else if(tim_baseHandle->Instance==TIM5)
   {
   /* USER CODE BEGIN TIM5_MspDeInit 0 */
@@ -312,6 +440,38 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM20_MspDeInit 1 */
   }
 }
+
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) //! Функция обработки прерывания
+{
+  if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
+  {
+    //!Все задержки по времени считаются через второй таймер
+    trigger_timestamp = TIM2->CNT;
+    
+    //!Новый счетчик спилов
+    trigger_counter++;
+    
+    //!Через него запустим обработку в меине
+    trigger_detected = 1;
+  }
+}
+
+uint8_t is_trigger_detected(void) {
+    return trigger_detected;
+}
+
+void clear_trigger_flag(void) {
+    trigger_detected = 0;
+}
+
+uint32_t get_last_trigger_time(void) {
+    return trigger_timestamp;
+}
+
+uint32_t get_trigger_count(void) {
+    return trigger_counter;
+}
+
 
 /* USER CODE BEGIN 1 */
 

@@ -30,6 +30,6 @@ void setLength (uint16_t length);
 
 void protoLink_Start(void);
 __IO void ADC_transmit(int16_t value);
-__IO void DAQ_transmit(spill_t * spill, uint8_t len);
+__IO void DAQ_transmit(spill_t * spill);
 
 #endif /* INC_PROTOLINK_H_ */

@@ -8,7 +8,7 @@
 #ifndef INC_STRESS_H_
 #define INC_STRESS_H_
 
-
+extern spill_t testSpill;
 hit_t getRandomHit(uint8_t size);
 void getRandomSpill(uint8_t size);
 

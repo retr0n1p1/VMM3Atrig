@@ -1,2 +1,2 @@
-../Core/Src/stress.c:9:7:getRandomHit	24	static
-../Core/Src/stress.c:23:6:getRandomSpill	48	static
+stress.c:9:7:getRandomHit	32	static
+stress.c:23:6:getRandomSpill	48	static

@@ -48,7 +48,6 @@
 extern uint8_t 	buff[256];
 extern uint8_t 	linkState;
 extern uint8_t  calibRunState;
-extern spill_t 	Spill;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -63,6 +62,7 @@ extern spill_t 	Spill;
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim5;
 extern TIM_HandleTypeDef htim20;
 extern UART_HandleTypeDef huart1;
@@ -273,14 +273,24 @@ void EXTI9_5_IRQHandler(void)
 
 	VMM3A_STOP;
 	NVIC_DisableIRQ(EXTI9_5_IRQn);
-	VMM3A_readout();
-	DAQ_transmit(&Spill, Spill.hitCount);
+	VMM3A_readout(); //!Читаем, пишем в буффер, но не отправляем
 	NVIC_EnableIRQ(EXTI9_5_IRQn);
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 	VMM3A_START;
   /* USER CODE END EXTI9_5_IRQn 1 */
+}
+
+void TIM3_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_IRQn 0 */
+
+  /* USER CODE END TIM3_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_IRQn 1 */
+
+  /* USER CODE END TIM3_IRQn 1 */
 }
 
 /**

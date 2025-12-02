@@ -1,0 +1,5 @@
+../Core/Src/vmm3a.c:13:6:VMM3A_init	24	static
+../Core/Src/vmm3a.c:26:6:VMM3A_start	0	static
+../Core/Src/vmm3a.c:32:6:VMM3A_stop	0	static
+../Core/Src/vmm3a.c:101:6:Dummy_Receive	0	static
+../Core/Src/vmm3a.c:107:6:VMM3A_readout	48	static

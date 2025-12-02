@@ -1,0 +1,9 @@
+../Core/Src/protoLink.c:16:6:protoLink_Start	1
+../Core/Src/protoLink.c:21:6:processBuff	9
+../Core/Src/protoLink.c:55:6:processErr	1
+../Core/Src/protoLink.c:59:6:HAL_UART_RxCpltCallback	3
+../Core/Src/protoLink.c:79:6:setPeriod	2
+../Core/Src/protoLink.c:95:6:dataTaking	2
+../Core/Src/protoLink.c:109:6:ADC_transmit	1
+../Core/Src/protoLink.c:124:6:DAQ_transmit	1
+../Core/Src/protoLink.c:130:6:DAQ_dummy_transmit	3

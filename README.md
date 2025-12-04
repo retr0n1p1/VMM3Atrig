@@ -11,9 +11,12 @@
 4. Run `st-flash write VMM3Atrig.bin 0x08000000` to flash firmware
 5. Run `st-info --reset` to reset board after flashing
 ## **CODE NAVIGATION**
-**Configuration** You can find configuration settings in `VMM3Atrig/Core/Inc/vmm3a.h`  
-**Time filtering algorithms** You can find it in `VMM3Atrig/Core/Src/main.c` in infinite while loop  
-**FIFO (buffer) algorithms** You can find it in `VMM3Atrig/Core/Src/vmm3a.c`  
+**Configuration** You can find configuration settings in `VMM3Atrig/Core/Inc/vmm3a.h`
+
+**Time filtering algorithms** You can find it in `VMM3Atrig/Core/Src/main.c` in infinite while loop
+
+**FIFO (buffer) algorithms** You can find it in `VMM3Atrig/Core/Src/vmm3a.c`
+
 **Trigger interrupt functions** You can find it in `VMM3Atrig/Core/Src/tim.c` and interrupt handler in `VMM3Atrig/Core/Src/stm32g4xx_it.c`
 ## **CONFIGURATION**
 ### Board name

@@ -1,8 +1,0 @@
-protoLink.c:19:6:protoLink_Start	8	static
-protoLink.c:24:6:processBuff	24	static
-protoLink.c:61:6:processErr	0	static
-protoLink.c:65:6:HAL_UART_RxCpltCallback	8	static
-protoLink.c:85:6:setPeriod	0	static
-protoLink.c:101:6:dataTaking	8	static
-protoLink.c:119:6:ADC_transmit	24	static
-protoLink.c:134:11:DAQ_transmit	0	static

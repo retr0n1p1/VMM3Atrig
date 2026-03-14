@@ -19,7 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "tim.h"
-
+#include "usart.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -27,6 +27,7 @@
 volatile uint32_t trigger_timestamp = 0;
 volatile uint8_t trigger_detected = 0;
 volatile uint32_t trigger_counter = 0;
+volatile uint32_t oldTime = 0;
 
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
@@ -132,6 +133,15 @@ void MX_TIM3_Init(void) //!Тут вся функция голимый вайб�
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
   /* USER CODE END TIM3_Init 0 */
 
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+//  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_IC_InitTypeDef sConfigIC = {0};  // Добавить для Input Capture
@@ -164,10 +174,11 @@ void MX_TIM3_Init(void) //!Тут вся функция голимый вайб�
   }
 
   // Настройка Input Capture для канала 3
-  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;  // Передний фронт
+ // sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_RISING;  // Передний фронт
+  sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;  // задний фронт
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;        // Прямое подключение
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;                  // Каждый фронт
-  sConfigIC.ICFilter = 1;  // Минимальный фильтр для 100 нс
+  sConfigIC.ICFilter = 2;  // Минимальный фильтр для 100 нс
 
   if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_3) != HAL_OK)
   {
@@ -191,7 +202,7 @@ void MX_TIM3_Init(void) //!Тут вся функция голимый вайб�
   __HAL_TIM_ENABLE_IT(&htim3, TIM_IT_CC3);
 
   // Настройка приоритета прерывания (НИЗКИЙ - 6, ниже чем EXTI9_5)
-  HAL_NVIC_SetPriority(TIM3_IRQn, 6, 0);
+  HAL_NVIC_SetPriority(TIM3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(TIM3_IRQn);
 
   // Запускаем таймер
@@ -441,18 +452,23 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   }
 }
 
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) //! Функция обработки прерывания
+void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
   if (htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
   {
-    //!Все задержки по времени считаются через второй таймер
-    trigger_timestamp = TIM2->CNT;
-    
-    //!Новый счетчик спилов
-    trigger_counter++;
-    
-    //!Через него запустим обработку в меине
-    trigger_detected = 1;
+//      for(size_t i = 0; i<1600; i++) __NOP();
+      trigger_timestamp = TIM2->CNT;
+      trigger_counter++;
+      trigger_detected = 1;
+      GPIOB->BSRR = GPIO_BSRR_BS13;
+
+      // небольшая задержка
+      __NOP(); __NOP(); __NOP(); __NOP();
+      __NOP(); __NOP(); __NOP(); __NOP();
+
+      // PB13 LOW
+      GPIOB->BSRR = GPIO_BSRR_BR13;
+
   }
 }
 
@@ -471,7 +487,9 @@ uint32_t get_last_trigger_time(void) {
 uint32_t get_trigger_count(void) {
     return trigger_counter;
 }
-
+void clear_counter(void){
+    trigger_counter = 1;
+}
 
 /* USER CODE BEGIN 1 */
 

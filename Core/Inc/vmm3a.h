@@ -17,15 +17,15 @@
 
 //Settings
 
-#define BOARD_ID 135 
+#define BOARD_ID 87
 #define sizeeFIFO 5 //!Длина статического массива для спилов
-#define filter 1 //!Режим фильтрации событий в буффуре 0 - только по окну,
+#define filter 2 //!Режим фильтрации событий в буффуре 0 - только по окну,
 		 //                                    1 - окно + предпочтительное время,
 		 //                                    2 - отправка последнего события из буффера
-#define window 4000 //!Окно для поиска события для отправки (для режима 0, 1)
+#define window 5500 //!Окно для поиска события для отправки (для режима 0, 1)
 #define trigDelay 1000 //!Примерная реальная задержка тригера, по ней будем отбирать ближайшее (режим 1)
 
-#define sendTrig 0 //!Отправлять пустое событие на свободный канал при каждом срабатывании тригера
+#define sendTrig 1 //!Отправлять пустое событие на свободный канал при каждом срабатывании тригера
 		   //для упращения синхронизации нескольких детекторов на этапе обработки
 #define chTrig 32 //!Канал для отправки пустых событий при срабатывании тригера
 
@@ -55,15 +55,16 @@ typedef struct
 	hit_t 	 hits[64];
 } spill_t;
 
-extern const uint8_t sizeFIFO; //!Делаем глобальные переменные для FIFO буффера
-extern uint8_t posFIFO;
+//extern const uint8_t sizeFIFO; //!Делаем глобальные переменные для FIFO буффера
+//extern uint8_t posFIFO;
 
-typedef struct //!Просто массив из спилов
-{
-        spill_t  spills[sizeeFIFO];
-} FIFO_t;
+//typedef struct //!Просто массив из спилов
+//{
+ //       spill_t  spills[sizeeFIFO];
+//} FIFO_t;
 
-extern FIFO_t FIFO;
+//extern FIFO_t FIFO;
+extern spill_t Spill;
 
 
 /*

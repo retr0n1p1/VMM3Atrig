@@ -58,7 +58,7 @@ uint8_t is_trigger_detected(void);
 void clear_trigger_flag(void);
 uint32_t get_last_trigger_time(void);
 uint32_t get_trigger_count(void);
-
+void clear_counter(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

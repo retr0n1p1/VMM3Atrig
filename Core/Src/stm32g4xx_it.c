@@ -213,64 +213,6 @@ void SysTick_Handler(void)
   */
 void EXTI9_5_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-
-
 	VMM3A_STOP;
 	NVIC_DisableIRQ(EXTI9_5_IRQn);
 	VMM3A_readout(); //!Читаем, пишем в буффер, но не отправляем

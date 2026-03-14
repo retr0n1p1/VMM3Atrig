@@ -10,18 +10,18 @@ extern SPI_HandleTypeDef hspi3;
 extern SPI_HandleTypeDef huart1;
 //!Инициализируем локальные для этого файла
 spill_t Spill = {0};
-const spill_t ClearSpill = {0};
+//const spill_t ClearSpill = {0};
 
-uint8_t posFIFO = 0;
-FIFO_t FIFO = {0}; //!Инициализируем глобальные
+//uint8_t posFIFO = 0;
+//FIFO_t FIFO = {0}; //!Инициализируем глобальные
 
-void initGlobals(void){ 
-	uint8_t posFIFO = 0;
-	FIFO_t FIFO = {0};
-	spill_t s = { .term = 1 }; //!Поднимаем флаг на игнор (пока пуст)
-	for(int i = 0; i<sizeeFIFO; i++)
-		FIFO.spills[i] = s;
-}
+//void initGlobals(void){ 
+//	uint8_t posFIFO = 0;
+//	FIFO_t FIFO = {0};
+//	spill_t s = { .term = 1 }; //!Поднимаем флаг на игнор (пока пуст)
+//	for(int i = 0; i<sizeeFIFO; i++)
+//		FIFO.spills[i] = s;
+//}
 
 void VMM3A_init(uint8_t * config){
 	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, 0); //ENA !
@@ -96,7 +96,7 @@ int  VMM3A_readout(void){
 
 		if(GPIOC->IDR & GPIO_PIN_8) { //D0
 
-			if(i == 0) {Spill.bcidd = TIM2->CNT;} //!Ловим время прилета по первому событию через второй таймер
+	//		if(i == 0) {Spill.bcidd = TIM2->CNT;} //!Ловим время прилета по первому событию через второй таймер
 			Spill.hits[i] = VMM3A_getHit();
 			//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK !
 			GPIOB->ODR &= ~GPIO_ODR_ODR_6;
@@ -128,17 +128,24 @@ int  VMM3A_readout(void){
 	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
 		GPIOB->ODR &= ~GPIO_ODR_ODR_6;
      
-	Spill.term = 0; //!Опускаем флаг на игнор
+//	Spill.term = 0; //!Опускаем флаг на игнор
 	Spill.hitCount = counts; 
-        if(posFIFO == sizeeFIFO - 1){ //!Кольцевая запись
-		FIFO.spills[0] = Spill;
-		posFIFO = 0;
-	}
-	else{
-		FIFO.spills[posFIFO+1] = Spill;
-		posFIFO++;
-	}
-	Spill = ClearSpill; //! Очищаем локальную переменную
+  //      if(posFIFO == sizeeFIFO - 1){ //!Кольцевая запись
+	//	FIFO.spills[0] = Spill;
+	//	posFIFO = 0;
+//	}
+//	else{
+//		FIFO.spills[posFIFO+1] = Spill;
+//		posFIFO++;
+//	}
+//    Spill.spillCount = trigcou;
+//    for(int i = 0; i<Spill.hitCount; i++){
+//        Spill.hits[i].event = trigcou; //!Прописываем его же в каждый хит
+//    }
+//    trigcou++;
+  //  DAQ_transmit(&Spill);
+
+//	Spill = ClearSpill; //! Очищаем локальную переменную
 
 //	HAL_IWDG_Refresh(&hiwdg);
  	return counts;

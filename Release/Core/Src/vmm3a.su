@@ -1,0 +1,5 @@
+vmm3a.c:26:6:VMM3A_init	24	static
+vmm3a.c:39:6:VMM3A_start	0	static
+vmm3a.c:45:6:VMM3A_stop	0	static
+vmm3a.c:80:6:Dummy_Receive	0	static
+vmm3a.c:86:6:VMM3A_readout	72	static

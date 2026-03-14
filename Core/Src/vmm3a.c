@@ -88,9 +88,9 @@ int  VMM3A_readout(void){
 //	if(!(GPIOB->IDR & GPIO_IDR_15)) break;
 
 	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1); //TKI
-	GPIOB->ODR |= GPIO_ODR_ODR_7;
+	GPIOB->BSRR = GPIO_BSRR_BS7;
 	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK
-	GPIOB->ODR |=  GPIO_ODR_ODR_6;
+	GPIOB->BSRR = GPIO_BSRR_BS6;
 
 	for(int i = 0; i < 64; i++){
 
@@ -98,35 +98,35 @@ int  VMM3A_readout(void){
 
 	//		if(i == 0) {Spill.bcidd = TIM2->CNT;} //!Ловим время прилета по первому событию через второй таймер
 			Spill.hits[i] = VMM3A_getHit();
-			//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK !
-			GPIOB->ODR &= ~GPIO_ODR_ODR_6;
-			//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1); //TKI !
-			GPIOB->ODR &= ~GPIO_ODR_ODR_7; ////////////////////// <<--- For TKI always ON test !!!
-		}
-		else {
 				//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK !
-				GPIOB->ODR &= ~GPIO_ODR_ODR_6;
+				GPIOB->BSRR = GPIO_BSRR_BR6;
 				//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1); //TKI !
-				GPIOB->ODR &= ~GPIO_ODR_ODR_7; ////////////////////// <<--- For TKI always ON test !!!
-			counts = i;
-			break;
+				GPIOB->BSRR = GPIO_BSRR_BR7; ////////////////////// <<--- For TKI always ON test !!!
+			}
+			else {
+					//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK !
+					GPIOB->BSRR = GPIO_BSRR_BR6;
+					//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1); //TKI !
+					GPIOB->BSRR = GPIO_BSRR_BR7; ////////////////////// <<--- For TKI always ON test !!!
+				counts = i;
+				break;
+			}
+			//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK
+			GPIOB->BSRR = GPIO_BSRR_BS6;
 		}
-		//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1); //CKTK
-		GPIOB->ODR |=  GPIO_ODR_ODR_6;
-	}
 
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
-		GPIOB->ODR |=  GPIO_ODR_ODR_6;
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
-		GPIOB->ODR &= ~GPIO_ODR_ODR_6;
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
-		GPIOB->ODR |=  GPIO_ODR_ODR_6;
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
-		GPIOB->ODR &= ~GPIO_ODR_ODR_6;
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
-		GPIOB->ODR |=  GPIO_ODR_ODR_6;
-	//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
-		GPIOB->ODR &= ~GPIO_ODR_ODR_6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
+			GPIOB->BSRR = GPIO_BSRR_BS6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
+			GPIOB->BSRR = GPIO_BSRR_BR6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
+			GPIOB->BSRR = GPIO_BSRR_BS6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
+			GPIOB->BSRR = GPIO_BSRR_BR6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK
+			GPIOB->BSRR = GPIO_BSRR_BS6;
+		//	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, 1); //CKTK !
+			GPIOB->BSRR = GPIO_BSRR_BR6;
      
 //	Spill.term = 0; //!Опускаем флаг на игнор
 	Spill.hitCount = counts; 
